@@ -16,7 +16,7 @@
           } elseif($view === "index") {
               $login= "login";
           } else {
-              $login = "login";
+              $login = "404";
           }
 
           return $login;

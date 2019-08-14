@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -9,14 +11,22 @@
 </head>
 
 <body>
-    <?php 
+    <?php
+        
+        $requestAjax = false;
         require_once("controllers/viewController.php");
         $viewController = new ViewController();
         $viewControllerR = $viewController->getViewController();
         
-        if($viewControllerR === "login"){
-            require_once ("view/conteudo/login-view.php");
+        if($viewControllerR === "login" || $viewControllerR === "404"){
+            if ($viewControllerR === "login") {
+                require_once ("view/conteudo/login-view.php");
+            } else {
+                require_once("view/conteudo/404-view.php");
+            }
+            
         } else {
+            session_start(); 
     ?>
         <!-- SideBar -->
         <?php require_once("view/modulos/navlateral.php"); ?>

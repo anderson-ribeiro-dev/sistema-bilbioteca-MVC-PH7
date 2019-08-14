@@ -38,6 +38,9 @@ $(document).ready(function(){
 			sidebar.addClass('hide-sidebar').removeClass('show-sidebar');
 		}
 	});
+	
+	
+
 });
 (function($){
     $(window).on("load",function(){

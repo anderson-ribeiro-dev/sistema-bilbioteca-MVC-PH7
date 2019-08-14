@@ -55,6 +55,15 @@ body, html{
 	background: 50% 50% no-repeat;
 	background-size: cover;
 }
+.container-404 {
+	background-image: url(../assets/img/sideBar.png);
+	color: #fff;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .text-titles{
 	font-family: 'RobotoCondensedLight'
 }
