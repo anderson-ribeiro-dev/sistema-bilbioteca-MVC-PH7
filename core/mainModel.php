@@ -1,12 +1,11 @@
 <?php 
-    if ($requestAjax) {
-        require_once("core/configApp.php");
+    if ($requestAjax = true) {
+        require_once("configApp.php");
     } else {
-        require_once("core/configApp.php");
+        require_once("configApp.php");
     }
-    
 
-    class MainModel {
+    class MainModel  {
         protected function connect(){
             $bd = new PDO(SGBD, USER, PASS);
             return $bd;
@@ -18,10 +17,65 @@
             return $response;
         }
 
+
+        //insert bd
+        protected function insertAccount($data) {
+            $sql = self::connect()->prepare("INSERT INTO cuenta(CuentaCodigo, CuentaPrivilegio, CuentaUsuario, CuentaClave, CuentaEmail, CuentaEstado, CuentaTipo, CuentaGenero, CuentaFoto) VALUES (:Codigo,:Privilegio, :Usuario, :Clave, :Email, :Estado, :Tipo, :Genero, :Foto)");
+            $sql->bindParam(":Codigo", $data["Codigo"]);
+            $sql->bindParam(":Privilegio", $data["Privilegio"]);
+            $sql->bindParam(":Usuario", $data["Usuario"]);
+            $sql->bindParam(":Clave", $data["Clave"]);
+            $sql->bindParam(":Email", $data["Email"]);
+            $sql->bindParam(":Estado", $data["Estado"]);
+            $sql->bindParam(":Tipo", $data["Tipo"]);
+            $sql->bindParam(":Genero", $data["Genero"]);
+            $sql->bindParam(":Foto", $data["Foto"]);
+            $sql->execute();
+            return $sql;
+        }
+
+        protected function deleteAccount($codigo){
+            $sql = self::connect()->prepare("DELETE FROM cuenta WHERE CuentaCodigo = :Codigo");
+            $sql->bindParam(":Codigo", $codigo);
+            $sql->execute();
+            return $sql;
+        }
+
+        //log
+        protected function saveLog($data){
+           $sql = self::connect()->prepare("INSERT INTO bitacora(BitacoraCodigo,BitacoraFecha, BitacoraHoraInicio, BitacoraHoraFinal, BitacoraTipo,BitacoraYear, CuentaCodigo) VALUES (:Codigo, :Fecha, :HoraInicio, :HoraFinal, :Tipo, :BYear, :CuentaCodigo )") ;
+           $sql->bindParam(":Codigo", $data['Codigo']);
+           $sql->bindParam(":Fecha", $data['Fecha']);
+           $sql->bindParam(":HoraInicio", $data['HoraInicio']);
+           $sql->bindParam(":HoraFinal", $data['HoraFinal']);
+           $sql->bindParam(":Tipo", $data['Tipo']);
+           $sql->bindParam(":BYear", $data['Year']);
+           $sql->bindParam(":CuentaCodigo", $data['CuentaCodigo']);
+           $sql->execute();
+           return $sql;
+        }
+
+        protected function updateLog($code, $hour){
+            $sql = self::connect()->prepare("UPDATE bitacora SET BitacoraHoraFinal = :Hora WHERE BitacoraCodigo = :Codigo ");
+            $sql->bindParam(":Hora", $hour);
+            $sql->bindParam(":Codigo", $code);
+            $sql->execute();
+            return $sql;
+        }
+
+        
+        protected function deleteLog($code){
+            $sql = self::connect()->prepare("DELETE FROM bitacora WHERE CuentaCodigo = :Codigo");
+            $sql->bindParam(":Codigo", $code);
+            $sql->execute();
+            return $sql;
+        }
+
+
         //password
         public function encryption($string){
             $output = FALSE;
-            $key = has('sha256', SECRET_KEY);
+            $key = hash('sha256', SECRET_KEY);
             $iv = substr(hash('sha256', SECRET_IV), 0, 16);
             $output = openssl_encrypt($string, METHOD, $key, 0, $iv);
             $output = base64_encode($output);
@@ -66,45 +120,45 @@
         }
 
         //https://sweetalert2.github.io/
-        protected function sweetAlert($dados){
-            if($dados['Alert'] === "simple") {
+        protected function sweetAlert($data){
+            if($data['Alert'] === "simple") {
                 $alert =  "
                     <script>
-                        Swal.fire(
-                            '". $dados["Title"] ."',
-                            '". $dados["Text"] ."',
-                            '". $dados["Type"] ."'
+                        swal(
+                            '". $data["Title"] ."',
+                            '". $data["Text"] ."',
+                            '". $data["Type"] ."'
                         );
                     </script>
                 ";
-            } elseif ($dados['Alert'] === "reload") {
+            } elseif ($data['Alert'] === "reload") {
                 $alert =  "
                     <script>
-                        Swal.fire({
-                            title: '". $dados["Title"]."',
-                            text: '". $dados["Text"] . "',
-                            type: '". $dados["Type"] . "',
+                        swal({
+                            title: '". $data["Title"]."',
+                            text: '". $data["Text"] . "',
+                            type: '". $data["Type"] . "',
                             confirmButtonText: 'Aceitar',
                         }).then((result) => {
-                            if (result.value) {
-                               location.reload(); 
+                            if(result.value){
+                                location.reload(); 
                             }
                         })   
                     </script>
                 ";
-            } elseif($dados['Alert'] === "clean") {
+            } elseif($data['Alert'] === "clean") {
                 $alert =  "
                     <script>
-                        Swal.fire({
-                            title: '" . $dados["Title"] . "',
-                            text: '" . $dados["Text"] . "',
-                            type: '" . $dados["Type"] . "',
-                            confirmButtonText: 'Limpar',
+                        swal({
+                            title: '" . $data["Title"] . "',
+                            text: '" . $data["Text"] . "',
+                            type: '" . $data["Type"] . "',
+                            confirmButtonText: 'Aceitar',
                         }).then((result) => {
-                            if (result.value) {
+                            if(result.value){
                                 $(.formClean)[0].reset();
                             }
-                        })   
+                        });   
                     </script>
                 ";
             } 

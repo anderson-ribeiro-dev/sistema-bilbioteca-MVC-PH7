@@ -1,10 +1,12 @@
 <?php 
+    // require_once("../models/viewModels.php");
     require_once("models/viewModels.php");
 
     class ViewController extends ViewModels {
 
         //métodos 
         public function getModelController(){
+        //    return require_once("../view/modelo.php");
            return require_once("view/modelo.php");
         }
 

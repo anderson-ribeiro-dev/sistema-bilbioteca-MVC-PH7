@@ -1,7 +1,9 @@
-<?php 
+<?php
     require_once("core/configGeral.php");
     require_once("controllers/viewController.php");
+    // require_once("controllers/loginController.php");
 
-    $models = new ViewController();
-    $models->getModelController();
+    $controller = new ViewController();
+    $controller->getModelController();
+    // $loginController = new LoginController();
 ?>

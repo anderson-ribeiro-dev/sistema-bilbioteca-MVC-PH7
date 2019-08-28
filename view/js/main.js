@@ -11,21 +11,7 @@ $(document).ready(function(){
 			SubMenu.addClass('show-sideBar-SubMenu');
 		}
 	});
-	$('.btn-exit-system').on('click', function(e){
-		e.preventDefault();
-		swal({
-		  	title: 'Are you sure?',
-		  	text: "The current session will be closed",
-		  	type: 'warning',
-		  	showCancelButton: true,
-		  	confirmButtonColor: '#03A9F4',
-		  	cancelButtonColor: '#F44336',
-		  	confirmButtonText: '<i class="zmdi zmdi-run"></i> Yes, Exit!',
-		  	cancelButtonText: '<i class="zmdi zmdi-close-circle"></i> No, Cancel!'
-		}).then(function () {
-			window.location.href="index.html";
-		});
-	});
+	
 	$('.btn-menu-dashboard').on('click', function(e){
 		e.preventDefault();
 		var body=$('.dashboard-contentPage');
@@ -39,8 +25,73 @@ $(document).ready(function(){
 		}
 	});
 	
-	
+	//insert data
+	$('.FormularioAjax').submit(function (e) { 
+		e.preventDefault();
+		var form = $(this);
+		var type = form.attr('data-form');
+		var action = form.attr('action');
+		var method = form.attr('method');
+		var response = form.children('.ResponseForm'); //enviar dados
 
+		var msgError = "<script>swal('Ocorreu  um erro inesperado!', 'Por favor tente novamente!', 'error');</script>";
+
+		var formData = new FormData(this);
+
+		var textAlert;
+		if(type === 'save'){
+			textAlert = "Dados serão salvos!";
+		} else if(type === "delete"){
+			textAlert = "Dados serão delelatos!";
+		} else if(type === "update") {
+			textAlert = "Dados serão atualizados";
+		} else {
+			textAlert =  "Consulta realizada";
+		}
+
+		swal({
+			title:  "Têm certeza!",
+			text:  textAlert,
+			type: "question",
+			showCancelButton: true,
+			confirmButtonText: "Confirmar",
+			cancelButtonText: "Cancelar"
+		}).then(function () {
+			$.ajax({
+				type: method,
+				url: action,
+				data: formData ? formData : formData.serialize(),
+				cache: false,
+				contentType: false,
+				processData: false,
+				dataType: "dataType",
+				xhr: function(){
+					var xhr = new window.XMLHttpRequest();
+					xhr.upload.addEventListener("progress", function(evt){
+						if(evt.lengthComputable){
+							var percentComplete = evt.loaded / evt.total;
+							percentComplete = parseInt(percentComplete * 100);	
+							if(percentComplete < 100){
+								response.append('<p class="text-center">Processando...(' + percentComplete + '%)</p><div class="progress progress-striped active"><div class="progress-bar progress-bar-info" style="width: '+ percentComplete +'%;"></div></div>');
+							} else {
+								response.html ('<p class="text-center"></p>')
+							}
+						}
+					}, false)
+					return xhr;
+				},
+				success: function (data) {
+					// console.log(data);
+					response.html(data);
+				},
+				error: function() {
+					response.html(msgError);
+				}
+			});
+			return false;
+		});
+		
+	});
 });
 (function($){
     $(window).on("load",function(){
