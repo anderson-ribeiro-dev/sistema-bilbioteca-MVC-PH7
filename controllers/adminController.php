@@ -6,6 +6,7 @@
     }
 
     class AdminController extends AdminModels {
+        
         public function insertAdminController(){
            $dni = MainModel::cleanLineForm($_POST["dni-reg"]); 
            $nombre = MainModel::cleanLineForm($_POST["nombre-reg"]);
@@ -140,5 +141,92 @@
            }
 
            return MainModel::sweetAlert($alert);
-        }   
+        }  
+        
+        //paginate administrador
+        public function paginateAdministratorController($page, $register, $privilege, $code){
+            $page = MainModel::cleanLineForm($page);
+            $register = MainModel::CleanLineForm($register);
+            $privilege = MainModel::CleanLineForm($privilege);
+            $code = MainModel::CleanLineForm($code);
+            $table = "";
+
+            $page = (isset($page) && $page > 0) ? (int)$page : 1;
+            $initial = ($page > 0) ? (($page * $register) - $register) : 0;
+
+            $conn = MainModel::connect();
+            $datas = $conn->query("
+                SELECT SQL_CACL_FOUND_ROWS * FROM admin WHERE CuentaCodigo != '$code' AND id != '1' ORDER BY AdminNombre ASC LIMIT $initial, $register
+            ");
+
+            $data = $datas->fetchAll(); //array query
+
+            $total = $conn->query("SELECT FOUND_ROWS()");
+            $total = (int) $total->fetchColumn();
+
+            $numberPage = ceil($total / $register); //int ceil()
+
+            $table .= '
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th class="text-center">DNI</th>
+                            <th class="text-center">NOMBRES</th>
+                            <th class="text-center">APELLIDOS</th>
+                            <th class="text-center">TELÉFONO</th>
+                            <th class="text-center">A. CUENTA</th>
+                            <th class="text-center">A. DATOS</th>
+                            <th class="text-center">ELIMINAR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            ';
+
+            if ($total >= 1 && $page <= $numberPage) {
+                $counter = $initial + 1;
+                foreach($datas as $rows){
+                    $table .= '
+                        <tr>
+                            <td>'. $counter .'</td>
+                            <td>' .rows['AdminDNI']. '</td>
+                            <td>' . rows['AdminNombre'] . '</td>
+                            <td>' . rows['AdminApellido'] . '</td>
+                            <td>' . rows['AdminTelefono'] . '</td>
+                            <td>
+                                <a href="#!" class="btn btn-success btn-raised btn-xs">
+                                    <i class="zmdi zmdi-refresh"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#!" class="btn btn-success btn-raised btn-xs">
+                                    <i class="zmdi zmdi-refresh"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <form>
+                                    <button type="submit" class="btn btn-danger btn-raised btn-xs">
+                                        <i class="zmdi zmdi-delete"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    ';
+                    $counter ++;
+                }
+            } else {
+                $table .= '
+                    <tr>
+                        <td colspan="5">Não existe registro no sistema</td>
+                    </tr>
+                ';
+            }
+            
+            $table .= '</tbody></table></div>';
+
+
+            return $table;
+        }
+
     }
